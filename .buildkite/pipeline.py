@@ -45,11 +45,12 @@ def get_default_branch():
 def is_affected(directory, includes, excludes, base, head):
     cmd = "git --no-pager diff --name-only {0}..{1}".format(base, head)
     for e in excludes:
-        cmd = cmd + " | grep -rvE {0}".format(os.path.join(directory, e))
+        cmd = cmd + " | grep -v -e {0}".format(os.path.join(directory, e))
     for i in includes:
-        cmd = cmd + " | grep -rE {0}".format(os.path.join(directory, i))
-    exit_code = subprocess.call(cmd, shell=True)
-    return exit_code != 0
+        cmd = cmd + " | grep {0}".format(os.path.join(directory, i))
+    cmd = cmd + " 2>/dev/null"
+    exit_code = subprocess.check_output(cmd, shell=True)
+    return exit_code == 0
 
 
 def trigger_build(project, head, branch):
