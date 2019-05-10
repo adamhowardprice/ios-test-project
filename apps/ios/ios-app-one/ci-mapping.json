@@ -1,0 +1,11 @@
+{
+	"ios-test-project-one": {
+		"include": {
+			"**"
+		},
+		"exclude": {
+			"**/*.md"
+		},
+		"script": "scripts/ci.sh"
+	}
+}

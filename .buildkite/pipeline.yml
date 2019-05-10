@@ -2,4 +2,4 @@ steps:
   - label: Build
     agents:
       macos: 'true'
-    command: (cd apps/ios/ios-app-one && ./scripts/scripts.sh)
+    command: (cd apps/ios/ios-app-one && ./scripts/ci.sh)
