@@ -3,7 +3,7 @@
 set -o pipefail
 
 xcodebuild \
-    -project TestIOSProject.xcodeproj \
-    -scheme TestIOSProject \
+    -project TestIOSProjectTwo.xcodeproj \
+    -scheme TestIOSProjectTwo \
     -destination "platform=iOS Simulator,name=iPhone X,OS=12.1" \
     clean test

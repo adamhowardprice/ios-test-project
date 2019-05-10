@@ -1,5 +1,0 @@
-steps:
-  - label: Build
-    agents:
-      macos: 'true'
-    command: python scripts/ci.py

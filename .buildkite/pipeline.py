@@ -29,6 +29,12 @@ def get_default_head():
     return output.replace('\n', '')
 
 
+def get_default_branch():
+    output = subprocess.check_output("git rev-parse --abbrev-ref HEAD",
+                                     shell=True)
+    return output.replace('\n', '')
+
+
 def is_affected(directory, includes, excludes, base, head):
     cmd = "git --no-pager diff --name-only {0}..{1}".format(base, head)
     for e in excludes:
@@ -39,12 +45,13 @@ def is_affected(directory, includes, excludes, base, head):
     return exit_code != 0
 
 
-def run_script_if_affected(directory, project, includes, excludes,
-                           script, base, head):
+def trigger_build_if_affected(directory, project, includes, excludes, base,
+                              head, branch):
     if is_affected(directory, includes, excludes, base, head):
-        print("Found changes in " + directory +
-              ", running {0}/{1}".format(directory, script))
-        subprocess.call(script, cwd=directory)
+        print("  - trigger: {}".format(project))
+        print("    label: ':rocket: Trigger {}'".format(project))
+        print("    build: {{ commit: {commit}, branch: '{br}' }}".format(
+            commit=head, br=branch))
 
 
 def main():
@@ -55,6 +62,9 @@ def main():
     parser.add_argument("-h", "--head",
                         help="The head commit", action="store_true",
                         default=get_default_head())
+    parser.add_argument("-r", "--branch",
+                        help="The branch", action="store_true",
+                        default=get_default_branch())
     args = parser.parse_args()
 
     for root, dirnames, filenames in os.walk('.'):
@@ -65,10 +75,9 @@ def main():
                 for project, mapping in m.items():
                     includes = mapping.get('includes')
                     excludes = mapping.get('excludes')
-                    script = mapping.get('script')
-                    run_script_if_affected(directory, project, includes,
-                                           excludes, script, args.base,
-                                           args.head)
+                    trigger_build_if_affected(directory, project, includes,
+                                              excludes, args.base, args.head,
+                                              args.branch)
 
 if __name__ == '__main__':
     main()
