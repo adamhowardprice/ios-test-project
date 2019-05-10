@@ -1,5 +1,5 @@
 steps:
-  - command: "python .buildkite/pipeline.py | buildkite-agent pipeline upload"
+  - command: "echo python .buildkite/pipeline.py && python .buildkite/pipeline.py | buildkite-agent pipeline upload"
     label: ":rocket:"
     agents:
     - "macos=true"
