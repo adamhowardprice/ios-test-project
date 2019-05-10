@@ -1,0 +1,9 @@
+steps:
+  - command: "python .buildkite/pipeline.py | buildkite-agent pipeline upload"
+    label: ":rocket:"
+    agents:
+    - "macos=true"
+
+  - wait
+
+  - command: "echo \"DONE!\""

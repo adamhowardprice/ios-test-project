@@ -19,17 +19,24 @@ import argparse
 
 
 def get_default_base():
+
     output = subprocess.check_output(
         "git ls-remote origin -h refs/heads/master | cut -f 1", shell=True)
     return output.replace('\n', '')
 
 
 def get_default_head():
+    buildkite_commit = os.environ.get('BUILDKITE_COMMIT')
+    if buildkite_commit is not None:
+        return buildkite_commit
     output = subprocess.check_output("git log -1 --format=%H", shell=True)
     return output.replace('\n', '')
 
 
 def get_default_branch():
+    buildkite_branch = os.environ.get('BUILDKITE_BRANCH')
+    if buildkite_branch is not None:
+        return buildkite_branch
     output = subprocess.check_output("git rev-parse --abbrev-ref HEAD",
                                      shell=True)
     return output.replace('\n', '')
@@ -45,13 +52,23 @@ def is_affected(directory, includes, excludes, base, head):
     return exit_code != 0
 
 
+def trigger_build(project, head, branch):
+    print("  - trigger: {}".format(project))
+    print("    label: ':rocket: Trigger {}'".format(project))
+    print("    build: {{ commit: {commit}, branch: '{br}' }}".format(
+        commit=head, br=branch))
+
+
 def trigger_build_if_affected(directory, project, includes, excludes, base,
                               head, branch):
-    if is_affected(directory, includes, excludes, base, head):
-        print("  - trigger: {}".format(project))
-        print("    label: ':rocket: Trigger {}'".format(project))
-        print("    build: {{ commit: {commit}, branch: '{br}' }}".format(
-            commit=head, br=branch))
+    should_trigger_build = False
+    is_pr = os.environ.get('BUILDKITE_PULL_REQUEST')
+    if is_pr is not None and is_pr is False:
+        should_trigger_build = True
+
+    if should_trigger_build or is_affected(directory, includes, excludes, base,
+                                           head):
+        trigger_build(project, head, branch)
 
 
 def main():
