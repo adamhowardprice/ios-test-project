@@ -1,8 +1,5 @@
 {
   "ios-test-project-two": {
-    "includes": [
-      "apps/ios/ios-app-two"
-    ],
     "excludes": [
       "*.md"
     ],

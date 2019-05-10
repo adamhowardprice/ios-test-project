@@ -1,3 +1,3 @@
 # ios-app-two
 
-This is the first test project in this repo
+This is the first project in this repo

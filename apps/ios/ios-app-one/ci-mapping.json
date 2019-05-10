@@ -1,8 +1,5 @@
 {
   "ios-test-project-one": {
-    "includes": [
-      "*"
-    ],
     "excludes": [
       "*.md"
     ],

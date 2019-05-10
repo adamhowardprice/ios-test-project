@@ -19,7 +19,6 @@ import argparse
 
 
 def get_default_base():
-
     output = subprocess.check_output(
         "git ls-remote origin -h refs/heads/master | cut -f 1", shell=True)
     return output.replace('\n', '')
@@ -42,14 +41,12 @@ def get_default_branch():
     return output.replace('\n', '')
 
 
-def is_affected(directory, includes, excludes, base, head):
+def is_affected(directory, excludes, base, head):
     cmd = "git --no-pager diff --name-only {0}..{1}".format(base, head)
     for e in excludes:
-        cmd = cmd + " | grep -v -e {0}".format(os.path.join(directory, e))
-    for i in includes:
-        cmd = cmd + " | grep {0}".format(os.path.join(directory, i))
-    cmd = cmd + " 2>/dev/null"
-    exit_code = subprocess.check_output(cmd, shell=True)
+        cmd = cmd + " | grep -r -v -e {0}".format(os.path.join(directory, e))
+    cmd = cmd + " | grep -r {0} >/dev/null".format(directory)
+    exit_code = subprocess.call(cmd, shell=True)
     return exit_code == 0
 
 
@@ -60,14 +57,14 @@ def trigger_build(project, head, branch):
         commit=head, br=branch))
 
 
-def trigger_build_if_affected(directory, project, includes, excludes, base,
+def trigger_build_if_affected(directory, project, excludes, base,
                               head, branch):
     should_trigger_build = False
     is_pr = os.environ.get('BUILDKITE_PULL_REQUEST')
     if is_pr is not None and is_pr is False:
         should_trigger_build = True
 
-    if should_trigger_build or is_affected(directory, includes, excludes, base,
+    if should_trigger_build or is_affected(directory, excludes, base,
                                            head):
         trigger_build(project, head, branch)
 
@@ -91,11 +88,10 @@ def main():
             with open(os.path.join(root, filename)) as j:
                 m = json.load(j)
                 for project, mapping in m.items():
-                    includes = mapping.get('includes')
                     excludes = mapping.get('excludes')
-                    trigger_build_if_affected(directory, project, includes,
-                                              excludes, args.base, args.head,
-                                              args.branch)
+                    trigger_build_if_affected(directory, project,
+                                              excludes, args.base,
+                                              args.head, args.branch)
 
 if __name__ == '__main__':
     main()
